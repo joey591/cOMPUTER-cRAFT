@@ -280,13 +280,25 @@ local function main()
     
     -- Main polling loop
     print("Starting transport loop...")
+    local pollCount = 0
     while true do
         local success, err = pcall(function()
-            -- Update status
-            updateStatus(machineId, "online")
+            -- Update status every poll
+            local statusData, statusCode = httpRequest("POST", "/api/status", {
+                machine_id = machineId,
+                status = "online"
+            })
+            
+            if statusCode ~= 200 then
+                print("Warning: Failed to update status (code: " .. tostring(statusCode) .. ")")
+            end
             
             -- Get commands
             local commands = getCommands(machineId)
+            
+            if commands and #commands > 0 then
+                print("Received " .. #commands .. " command(s)")
+            end
             
             -- Execute commands
             for _, command in ipairs(commands) do
@@ -294,13 +306,20 @@ local function main()
             end
             
             -- Re-register peripherals periodically (every 10 polls)
-            if os.clock() % (config.poll_interval * 10) < config.poll_interval then
+            pollCount = pollCount + 1
+            if pollCount >= 10 then
+                pollCount = 0
+                print("Re-registering peripherals...")
                 registerPeripherals(machineId)
             end
         end)
         
         if not success then
             print("Error in main loop: " .. tostring(err))
+            -- Try to update status as offline on error
+            pcall(function()
+                updateStatus(machineId, "error")
+            end)
         end
         
         sleep(config.poll_interval)

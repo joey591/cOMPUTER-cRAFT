@@ -121,14 +121,34 @@ async function loadMachines() {
                     <strong>${machine.name || 'Unnamed Machine'}</strong>
                     <div style="font-size: 0.875rem; color: var(--text-secondary);">
                         Last seen: ${machine.last_seen ? new Date(machine.last_seen).toLocaleString() : 'Never'}
+                        ${machine.id ? ` • ID: ${machine.id}` : ''}
                     </div>
                 </div>
-                <span class="status-badge ${statusClass}">${machine.status}</span>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span class="status-badge ${statusClass}">${machine.status}</span>
+                    <button class="btn btn-danger" onclick="disconnectMachine(${machine.id})" style="font-size: 0.875rem; padding: 0.5rem 1rem;">Disconnect</button>
+                </div>
             `;
             container.appendChild(item);
         });
     } catch (error) {
         console.error('Error loading machines:', error);
+    }
+}
+
+async function disconnectMachine(machineId) {
+    if (!confirm('Are you sure you want to disconnect this machine? It will need to re-authenticate to connect again.')) {
+        return;
+    }
+    
+    try {
+        await apiCall(`/machines/${machineId}`, {
+            method: 'DELETE'
+        });
+        await loadMachines();
+        showAlert('Machine disconnected successfully', 'success');
+    } catch (error) {
+        showAlert(error.message);
     }
 }
 

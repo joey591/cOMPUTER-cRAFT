@@ -505,4 +505,33 @@ def cc_update_status():
     return jsonify({'success': True})
 
 
+@api.route('/machines/<int:machine_id>', methods=['DELETE'])
+@login_required
+def delete_machine(machine_id):
+    """Deauthenticate/disconnect a machine."""
+    user_id = session['user_id']
+    machine = Machine.get_by_id(machine_id)
+    
+    if not machine:
+        return jsonify({'error': 'Machine not found'}), 404
+    
+    # Verify ownership
+    if machine['user_id'] != user_id:
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    # Set machine status to offline and clear API key association
+    from models import Database
+    conn = Database().get_connection()
+    cursor = conn.cursor()
+    cursor.execute('''
+        UPDATE machines 
+        SET status = 'offline', api_key_id = NULL, last_seen = ?
+        WHERE id = ?
+    ''', (datetime.utcnow().isoformat(), machine_id))
+    conn.commit()
+    conn.close()
+    
+    return jsonify({'success': True})
+
+
 

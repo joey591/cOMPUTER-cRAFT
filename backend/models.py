@@ -247,22 +247,31 @@ class Machine:
         """Register or update a machine."""
         conn = Database().get_connection()
         cursor = conn.cursor()
-        cursor.execute('''
-            INSERT INTO machines (user_id, api_key_id, name, last_seen, status)
-            VALUES (?, ?, ?, ?, ?)
-            ON CONFLICT DO NOTHING
-        ''', (user_id, api_key_id, name, datetime.utcnow().isoformat(), 'online'))
         
-        # Update existing machine if it exists
-        cursor.execute('''
-            UPDATE machines 
-            SET last_seen = ?, status = 'online', name = ?
-            WHERE user_id = ? AND api_key_id = ?
-        ''', (datetime.utcnow().isoformat(), name, user_id, api_key_id))
-        
+        # Check if machine already exists for this user and API key
         cursor.execute('''
             SELECT * FROM machines WHERE user_id = ? AND api_key_id = ?
         ''', (user_id, api_key_id))
+        existing = cursor.fetchone()
+        
+        if existing:
+            # Update existing machine
+            cursor.execute('''
+                UPDATE machines 
+                SET last_seen = ?, status = 'online', name = ?
+                WHERE id = ?
+            ''', (datetime.utcnow().isoformat(), name, existing['id']))
+            machine_id = existing['id']
+        else:
+            # Create new machine
+            cursor.execute('''
+                INSERT INTO machines (user_id, api_key_id, name, last_seen, status)
+                VALUES (?, ?, ?, ?, ?)
+            ''', (user_id, api_key_id, name, datetime.utcnow().isoformat(), 'online'))
+            machine_id = cursor.lastrowid
+        
+        # Get the machine record
+        cursor.execute('SELECT * FROM machines WHERE id = ?', (machine_id,))
         row = cursor.fetchone()
         conn.commit()
         conn.close()
