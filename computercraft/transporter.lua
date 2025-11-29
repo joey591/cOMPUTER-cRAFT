@@ -52,11 +52,19 @@ local function httpRequest(method, endpoint, data)
         body = body
     })
     
-    if response then
-        local success, result = pcall(textutils.unserializeJSON, response.getResponseCode() == 200 and response.readAll() or "{}")
-        if success then
-            return result, response.getResponseCode()
+    -- Check if response is valid (not a boolean false)
+    if response and type(response) == "table" then
+        local statusCode = response.getResponseCode()
+        local responseBody = response.readAll()
+        response.close()
+        
+        if statusCode == 200 then
+            local success, result = pcall(textutils.unserializeJSON, responseBody)
+            if success then
+                return result, statusCode
+            end
         end
+        return nil, statusCode
     end
     
     return nil, 500
