@@ -27,6 +27,11 @@ MACHINE_TIMEOUT = 60  # seconds before marking machine as offline
 SERVER_HOST = os.getenv('SERVER_HOST', '0.0.0.0')
 SERVER_PORT = int(os.getenv('SERVER_PORT', 7781))
 
+# SSL configuration
+SSL_ENABLED = os.getenv('SSL_ENABLED', 'True').lower() == 'true'
+SSL_CERT_PATH = os.getenv('SSL_CERT_PATH', '')  # Path to SSL certificate file
+SSL_KEY_PATH = os.getenv('SSL_KEY_PATH', '')   # Path to SSL private key file
+
 # Item filtering
 FUZZY_MATCH_THRESHOLD = 0.6  # Minimum similarity score (0-1)
 ABBREVIATION_MAP = {

@@ -2,7 +2,7 @@
 -- Connects to Flask server and executes item transport routes
 
 local config = {
-    server_url = "https://dynamices.nl:7781",
+    server_url = "http://dynamices.nl:7781",
     api_key = "",
     machine_name = "Computer",
     poll_interval = 5, -- seconds
@@ -45,15 +45,12 @@ local function httpRequest(method, endpoint, data)
         body = textutils.serializeJSON(data)
     end
     
-    local requestOptions = {
+    local response = http.request({
         url = url,
         method = method,
         headers = headers,
-        body = body,
-        insecure = true  -- Skip SSL certificate verification (needed for some HTTPS setups)
-    }
-    
-    local response = http.request(requestOptions)
+        body = body
+    })
     
     if response then
         local success, result = pcall(textutils.unserializeJSON, response.getResponseCode() == 200 and response.readAll() or "{}")

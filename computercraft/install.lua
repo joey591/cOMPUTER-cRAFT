@@ -1,7 +1,7 @@
 -- ComputerCraft Item Transporter Installation Script
 -- Run this script to download and set up the transporter
 
-local SERVER_URL = "https://dynamices.nl:7781"  -- Server URL
+local SERVER_URL = "http://dynamices.nl:7781"  -- Server URL
 local TRANSPORTER_URL = SERVER_URL .. "/static/transporter.lua"  -- Adjust path as needed
 
 print("ComputerCraft Item Transporter Installer")
@@ -12,13 +12,7 @@ print()
 local function downloadFile(url, filename)
     print("Downloading " .. filename .. " from " .. url .. "...")
     
-    -- Use http.request with insecure option to skip SSL verification
-    local response = http.request({
-        url = url,
-        method = "GET",
-        insecure = true  -- Skip SSL certificate verification (needed for some HTTPS setups)
-    })
-    
+    local response = http.get(url)
     if not response then
         print("ERROR: Could not download file from " .. url)
         return false
