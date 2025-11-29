@@ -245,37 +245,57 @@ class Machine:
     @staticmethod
     def register(user_id, api_key_id, name):
         """Register or update a machine."""
-        conn = Database().get_connection()
-        cursor = conn.cursor()
-        
-        # Check if machine already exists for this user and API key
-        cursor.execute('''
-            SELECT * FROM machines WHERE user_id = ? AND api_key_id = ?
-        ''', (user_id, api_key_id))
-        existing = cursor.fetchone()
-        
-        if existing:
-            # Update existing machine
+        try:
+            conn = Database().get_connection()
+            cursor = conn.cursor()
+            
+            # Check if machine already exists for this user and API key
             cursor.execute('''
-                UPDATE machines 
-                SET last_seen = ?, status = 'online', name = ?
-                WHERE id = ?
-            ''', (datetime.utcnow().isoformat(), name, existing['id']))
-            machine_id = existing['id']
-        else:
-            # Create new machine
-            cursor.execute('''
-                INSERT INTO machines (user_id, api_key_id, name, last_seen, status)
-                VALUES (?, ?, ?, ?, ?)
-            ''', (user_id, api_key_id, name, datetime.utcnow().isoformat(), 'online'))
-            machine_id = cursor.lastrowid
-        
-        # Get the machine record
-        cursor.execute('SELECT * FROM machines WHERE id = ?', (machine_id,))
-        row = cursor.fetchone()
-        conn.commit()
-        conn.close()
-        return dict(row) if row else None
+                SELECT * FROM machines WHERE user_id = ? AND api_key_id = ?
+            ''', (user_id, api_key_id))
+            existing = cursor.fetchone()
+            
+            if existing:
+                # Update existing machine
+                cursor.execute('''
+                    UPDATE machines 
+                    SET last_seen = ?, status = 'online', name = ?
+                    WHERE id = ?
+                ''', (datetime.utcnow().isoformat(), name, existing['id']))
+                machine_id = existing['id']
+            else:
+                # Create new machine
+                cursor.execute('''
+                    INSERT INTO machines (user_id, api_key_id, name, last_seen, status)
+                    VALUES (?, ?, ?, ?, ?)
+                ''', (user_id, api_key_id, name, datetime.utcnow().isoformat(), 'online'))
+                machine_id = cursor.lastrowid
+            
+            # Get the machine record
+            cursor.execute('SELECT * FROM machines WHERE id = ?', (machine_id,))
+            row = cursor.fetchone()
+            conn.commit()
+            conn.close()
+            
+            if row:
+                return dict(row)
+            else:
+                print(f"Warning: Machine registered but not found (ID: {machine_id})")
+                return None
+        except Exception as e:
+            import traceback
+            print(f"Error in Machine.register: {e}")
+            print(traceback.format_exc())
+            if 'conn' in locals():
+                conn.close()
+            return None
+        except Exception as e:
+            import traceback
+            print(f"Error in Machine.register: {e}")
+            print(traceback.format_exc())
+            if 'conn' in locals():
+                conn.close()
+            return None
     
     @staticmethod
     def get_by_user(user_id):

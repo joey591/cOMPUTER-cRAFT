@@ -390,14 +390,24 @@ def delete_route(route_id):
 @api_key_required
 def cc_auth():
     """Authenticate CC machine and register it."""
-    data = request.json or {}
-    machine_name = data.get('name', 'Unknown Machine')
-    
-    machine = Machine.register(request.api_user_id, request.api_key_id, machine_name)
-    return jsonify({
-        'machine_id': machine['id'],
-        'status': 'authenticated'
-    })
+    try:
+        data = request.json or {}
+        machine_name = data.get('name', 'Unknown Machine')
+        
+        machine = Machine.register(request.api_user_id, request.api_key_id, machine_name)
+        
+        if not machine:
+            return jsonify({'error': 'Failed to register machine'}), 500
+        
+        return jsonify({
+            'machine_id': machine['id'],
+            'status': 'authenticated'
+        })
+    except Exception as e:
+        import traceback
+        print(f"Error in cc_auth: {e}")
+        print(traceback.format_exc())
+        return jsonify({'error': str(e)}), 500
 
 
 @api.route('/peripherals', methods=['POST'])
