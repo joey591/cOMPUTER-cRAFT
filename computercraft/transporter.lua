@@ -45,12 +45,15 @@ local function httpRequest(method, endpoint, data)
         body = textutils.serializeJSON(data)
     end
     
-    local response = http.request({
+    local requestOptions = {
         url = url,
         method = method,
         headers = headers,
-        body = body
-    })
+        body = body,
+        insecure = true  -- Skip SSL certificate verification (needed for some HTTPS setups)
+    }
+    
+    local response = http.request(requestOptions)
     
     if response then
         local success, result = pcall(textutils.unserializeJSON, response.getResponseCode() == 200 and response.readAll() or "{}")

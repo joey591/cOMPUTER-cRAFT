@@ -12,7 +12,13 @@ print()
 local function downloadFile(url, filename)
     print("Downloading " .. filename .. " from " .. url .. "...")
     
-    local response = http.get(url)
+    -- Use http.request with insecure option to skip SSL verification
+    local response = http.request({
+        url = url,
+        method = "GET",
+        insecure = true  -- Skip SSL certificate verification (needed for some HTTPS setups)
+    })
+    
     if not response then
         print("ERROR: Could not download file from " .. url)
         return false

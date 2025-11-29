@@ -13,6 +13,7 @@ os.makedirs(DATABASE_DIR, exist_ok=True)
 # Flask configuration
 SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
 DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
+FORCE_HTTPS = os.getenv('FORCE_HTTPS', 'True').lower() == 'true'  # Default to True for production
 
 # API configuration
 API_KEY_LENGTH = 32

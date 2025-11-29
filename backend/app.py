@@ -1,8 +1,9 @@
 """Main Flask application."""
 import os
 from pathlib import Path
-from flask import Flask
-from config import SECRET_KEY, DEBUG
+from flask import Flask, request
+from werkzeug.middleware.proxy_fix import ProxyFix
+from config import SECRET_KEY, DEBUG, FORCE_HTTPS
 
 # Get base directory
 BASE_DIR = Path(__file__).parent.parent
@@ -14,6 +15,23 @@ app = Flask(
 )
 app.secret_key = SECRET_KEY
 app.debug = DEBUG
+
+# Handle reverse proxy (for HTTPS behind proxy)
+# Trust X-Forwarded-* headers from proxy
+app.wsgi_app = ProxyFix(
+    app.wsgi_app,
+    x_for=1,      # Number of proxies to trust
+    x_proto=1,    # Trust X-Forwarded-Proto header
+    x_host=1,     # Trust X-Forwarded-Host header
+    x_port=1      # Trust X-Forwarded-Port header
+)
+
+# Force HTTPS URLs when behind proxy
+if FORCE_HTTPS:
+    @app.before_request
+    def force_https():
+        if request.headers.get('X-Forwarded-Proto') == 'https':
+            request.scheme = 'https'
 
 from routes import api, web
 from peripheral_discovery import PeripheralDiscovery
@@ -29,12 +47,6 @@ db = Database()
 # Initialize peripheral discovery
 discovery = PeripheralDiscovery(app)
 discovery.start()
-
-
-@app.before_request
-def before_request():
-    """Handle before request."""
-    pass
 
 
 @app.teardown_appcontext
