@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - CC Transporter{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="admin-header">
+        <h1>Admin Dashboard</h1>
+    </div>
+    
+    <div class="admin-tabs">
+        <button class="tab-btn active" onclick="showTab('users')">Users</button>
+        <button class="tab-btn" onclick="showTab('system')">System</button>
+    </div>
+    
+    <div id="users-tab" class="admin-tab-content active">
+        <div class="admin-section-header">
+            <h2>User Management</h2>
+            <button class="btn btn-primary" onclick="showCreateUserModal()">Create User</button>
+        </div>
+        <div id="users-table" class="admin-table-container">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Admin</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="users-table-body"></tbody>
+            </table>
+        </div>
+    </div>
+    
+    <div id="system-tab" class="admin-tab-content">
+        <div class="admin-section">
+            <h2>System Configuration</h2>
+            <div class="config-item">
+                <label>Peripheral Discovery Interval:</label>
+                <span>30 seconds</span>
+            </div>
+            <div class="config-item">
+                <label>Machine Timeout:</label>
+                <span>60 seconds</span>
+            </div>
+            <div class="config-item">
+                <label>Database Status:</label>
+                <span class="status-online">Connected</span>
+            </div>
+        </div>
+        
+        <div class="admin-section">
+            <h2>Statistics</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="total-users">-</div>
+                    <div class="stat-label">Total Users</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="total-machines">-</div>
+                    <div class="stat-label">Connected Machines</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="total-routes">-</div>
+                    <div class="stat-label">Active Routes</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create User Modal -->
+<div id="create-user-modal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeCreateUserModal()">&times;</span>
+        <h2>Create User</h2>
+        <form id="create-user-form" onsubmit="createUser(event)">
+            <div class="form-group">
+                <label for="user-username">Username</label>
+                <input type="text" id="user-username" required>
+            </div>
+            <div class="form-group">
+                <label for="user-password">Password</label>
+                <input type="password" id="user-password" required>
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="user-admin"> Admin privileges
+                </label>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeCreateUserModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Create User</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+

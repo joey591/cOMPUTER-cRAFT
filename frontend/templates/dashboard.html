@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - CC Transporter{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h1>Item Transporter Dashboard</h1>
+        <button class="btn btn-primary" onclick="showCreateRouteModal()">Create Route</button>
+    </div>
+    
+    <div class="dashboard-grid">
+        <div class="dashboard-section">
+            <h2>API Keys</h2>
+            <div class="api-keys-section">
+                <button class="btn btn-secondary" onclick="createAPIKey()">Generate API Key</button>
+                <div id="api-keys-list" class="api-keys-list"></div>
+            </div>
+        </div>
+        
+        <div class="dashboard-section">
+            <h2>Account Settings</h2>
+            <button class="btn btn-secondary" onclick="showChangePasswordModal()">Change Password</button>
+        </div>
+        
+        <div class="dashboard-section full-width">
+            <h2>How to Connect a ComputerCraft Computer</h2>
+            <div class="connection-guide">
+                <ol>
+                    <li><strong>Get an API Key:</strong> Click "Generate API Key" above and copy it (you'll only see it once!)</li>
+                    <li><strong>In your ComputerCraft computer, run:</strong>
+                        <pre>wget http://YOUR_SERVER_IP:5000/static/install.lua install
+install</pre>
+                        Replace <code>YOUR_SERVER_IP</code> with your server's IP address (e.g., <code>192.168.1.100</code> or <code>localhost</code> if testing locally)
+                    </li>
+                    <li><strong>Enter your API key</strong> when prompted</li>
+                    <li><strong>Enter a name</strong> for your computer (e.g., "Mining Computer")</li>
+                    <li>The computer will automatically start and connect!</li>
+                </ol>
+                <p><strong>Manual Setup:</strong> If wget doesn't work, copy <code>transporter.lua</code> to your computer and create a <code>transporter_config</code> file with your API key and server URL.</p>
+                <p><strong>Note:</strong> Make sure HTTP API is enabled in your ComputerCraft config file.</p>
+            </div>
+        </div>
+        
+        <div class="dashboard-section">
+            <h2>Connected Machines</h2>
+            <div id="machines-list" class="machines-list"></div>
+        </div>
+        
+        <div class="dashboard-section">
+            <h2>Peripherals</h2>
+            <div id="peripherals-list" class="peripherals-list"></div>
+        </div>
+        
+        <div class="dashboard-section full-width">
+            <h2>Routes</h2>
+            <div id="routes-list" class="routes-list"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Create Route Modal -->
+<div id="create-route-modal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeCreateRouteModal()">&times;</span>
+        <h2>Create Route</h2>
+        <form id="create-route-form" onsubmit="createRoute(event)">
+            <div class="form-group">
+                <label for="route-name">Route Name</label>
+                <input type="text" id="route-name" required>
+            </div>
+            <div class="form-group">
+                <label for="source-peripheral">Source Peripheral</label>
+                <select id="source-peripheral" required></select>
+            </div>
+            <div class="form-group">
+                <label for="dest-peripheral">Destination Peripheral</label>
+                <select id="dest-peripheral" required></select>
+            </div>
+            <div class="form-group">
+                <label for="item-filter">Item Filter (optional)</label>
+                <input type="text" id="item-filter" placeholder="e.g., iron_b, iron_i">
+                <div id="item-suggestions" class="item-suggestions"></div>
+            </div>
+            <div class="form-group">
+                <label>Selected Items</label>
+                <div id="selected-items" class="selected-items"></div>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeCreateRouteModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Create Route</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Change Password Modal -->
+<div id="change-password-modal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeChangePasswordModal()">&times;</span>
+        <h2>Change Password</h2>
+        <form id="change-password-form" onsubmit="changePassword(event)">
+            <div class="form-group">
+                <label for="old-password">Current Password</label>
+                <input type="password" id="old-password" required>
+            </div>
+            <div class="form-group">
+                <label for="new-password">New Password</label>
+                <input type="password" id="new-password" required>
+            </div>
+            <div class="form-group">
+                <label for="confirm-password">Confirm New Password</label>
+                <input type="password" id="confirm-password" required>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeChangePasswordModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Change Password</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
