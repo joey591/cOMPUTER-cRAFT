@@ -59,9 +59,28 @@ local function httpRequest(method, endpoint, data)
         response.close()
         
         if statusCode == 200 then
-            local success, result = pcall(textutils.unserializeJSON, responseBody)
-            if success then
-                return result, statusCode
+            if responseBody and responseBody ~= "" then
+                local success, result = pcall(textutils.unserializeJSON, responseBody)
+                if success and result then
+                    return result, statusCode
+                else
+                    print("JSON parse error: " .. tostring(result))
+                    -- Try to return empty table if JSON is empty
+                    if responseBody == "" or responseBody == "{}" then
+                        return {}, statusCode
+                    end
+                end
+            else
+                -- Empty response but 200 status
+                return {}, statusCode
+            end
+        else
+            -- Non-200 status, try to parse error message
+            if responseBody and responseBody ~= "" then
+                local success, result = pcall(textutils.unserializeJSON, responseBody)
+                if success then
+                    return result, statusCode
+                end
             end
         end
         return nil, statusCode
@@ -76,8 +95,28 @@ local function authenticate()
         name = config.machine_name
     })
     
+    print("Auth response - Code: " .. tostring(code) .. ", Data: " .. tostring(data ~= nil))
+    if data then
+        print("Auth data: " .. textutils.serialize(data))
+    end
+    
     if code == 200 and data then
-        return data.machine_id
+        if data.machine_id then
+            print("Authentication successful! Machine ID: " .. tostring(data.machine_id))
+            return data.machine_id
+        else
+            print("ERROR: Response missing machine_id")
+            if data.error then
+                print("Server error: " .. tostring(data.error))
+            end
+        end
+    elseif code == 401 then
+        print("ERROR: Authentication failed - Invalid API key (401)")
+        if data and data.error then
+            print("Server error: " .. tostring(data.error))
+        end
+    else
+        print("ERROR: Authentication failed with code: " .. tostring(code))
     end
     
     return nil
