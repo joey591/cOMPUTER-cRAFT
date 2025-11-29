@@ -24,7 +24,7 @@ MACHINE_TIMEOUT = 60  # seconds before marking machine as offline
 
 # Server configuration
 SERVER_HOST = os.getenv('SERVER_HOST', '0.0.0.0')
-SERVER_PORT = int(os.getenv('SERVER_PORT', 5000))
+SERVER_PORT = int(os.getenv('SERVER_PORT', 7781))
 
 # Item filtering
 FUZZY_MATCH_THRESHOLD = 0.6  # Minimum similarity score (0-1)
