@@ -1,7 +1,7 @@
 -- ComputerCraft Item Transporter Installation Script
 -- Run this script to download and set up the transporter
 
-local SERVER_URL = "http://localhost:5000"  -- Change this to your server URL
+local SERVER_URL = "https://dynamices.nl:7781"  -- Server URL
 local TRANSPORTER_URL = SERVER_URL .. "/static/transporter.lua"  -- Adjust path as needed
 
 print("ComputerCraft Item Transporter Installer")

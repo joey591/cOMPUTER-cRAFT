@@ -2,7 +2,7 @@
 -- Connects to Flask server and executes item transport routes
 
 local config = {
-    server_url = "http://localhost:5000",
+    server_url = "https://dynamices.nl:7781",
     api_key = "",
     machine_name = "Computer",
     poll_interval = 5, -- seconds
